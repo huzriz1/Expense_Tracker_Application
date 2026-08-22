@@ -1,0 +1,8 @@
+# Secret configuration keys (DON'T PUSH TO GITHUB)
+.env
+.env.local
+
+# Heavy system files
+node_modules/
+dist/
+.json
