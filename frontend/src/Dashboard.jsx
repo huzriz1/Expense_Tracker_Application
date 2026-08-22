@@ -20,7 +20,7 @@ import api from "./api"; // Jo Axios instance humne banaya tha
 
 const Dashboard = () => {
     useEffect(() => {
-    document.title = "Console Workspace | Paisa Bachat";
+    document.title = "Dashboard Workspace | Paisa Bachat";
   }, []);
 
   const { user } = useUser();
