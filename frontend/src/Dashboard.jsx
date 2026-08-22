@@ -87,18 +87,31 @@ const Dashboard = () => {
   }, [user?.id]);
 
   // 2. Smart Category Filtering based on Income/Expense type
-  const filteredCategories = allCategories.filter((cat) => cat.type === txType);
-
+  // const filteredCategories = allCategories.filter((cat) => cat.type === txType);
+const filteredCategories = Array.isArray(allCategories) 
+    ? allCategories.filter((cat) => cat?.type === txType) 
+    : [];
   // 3. Dynamic Live Stats Calculation (Database values ke mutabik)
-  const stats = transactions.reduce(
-    (acc, tx) => {
-      if (tx.type === "income") acc.income += tx.amount;
-      if (tx.type === "expense") acc.expense += tx.amount;
-      acc.balance = acc.income - acc.expense;
-      return acc;
-    },
-    { income: 0, expense: 0, balance: 0 },
-  );
+  // const stats = transactions.reduce(
+  //   (acc, tx) => {
+  //     if (tx.type === "income") acc.income += tx.amount;
+  //     if (tx.type === "expense") acc.expense += tx.amount;
+  //     acc.balance = acc.income - acc.expense;
+  //     return acc;
+  //   },
+  //   { income: 0, expense: 0, balance: 0 },
+  // );
+  const stats = Array.isArray(transactions) 
+    ? transactions.reduce(
+        (acc, tx) => {
+          if (tx?.type === "income") acc.income += tx.amount || 0;
+          if (tx?.type === "expense") acc.expense += tx.amount || 0;
+          acc.balance = acc.income - acc.expense;
+          return acc;
+        },
+        { income: 0, expense: 0, balance: 0 }
+      )
+    : { income: 0, expense: 0, balance: 0 };
 
   // 4. Form Submit - Save Transaction to MongoDB Database
   // const handleSaveTransaction = async (e) => {
@@ -164,14 +177,26 @@ const Dashboard = () => {
   };
 
   // Recharts Chart Format Converter (Live data ko graph mein badalne ke liye)
-  const chartData = transactions
-    .slice(0, 7)
-    .reverse()
-    .map((tx) => ({
-      name: new Date(tx.date).toLocaleDateString("en-US", { weekday: "short" }),
-      Income: tx.type === "income" ? tx.amount : 0,
-      Expenses: tx.type === "expense" ? tx.amount : 0,
-    }));
+  // const chartData = transactions
+  //   .slice(0, 7)
+  //   .reverse()
+  //   .map((tx) => ({
+  //     name: new Date(tx.date).toLocaleDateString("en-US", { weekday: "short" }),
+  //     Income: tx.type === "income" ? tx.amount : 0,
+  //     Expenses: tx.type === "expense" ? tx.amount : 0,
+  //   }));
+    // 🎯 FIX: Recharts Graph structural safety loop validator map check
+  const chartData = Array.isArray(transactions) && transactions.length > 0
+    ? transactions
+        .slice(0, 7)
+        .reverse()
+        .map((tx) => ({
+          name: tx?.date ? new Date(tx.date).toLocaleDateString("en-US", { weekday: "short" }) : "Day",
+          Income: tx?.type === "income" ? tx.amount : 0,
+          Expenses: tx?.type === "expense" ? tx.amount : 0,
+        }))
+    : [];
+
 
   if (loading) {
     return (
@@ -245,7 +270,7 @@ const Dashboard = () => {
                   className="w-full bg-background border border-input text-foreground rounded-md p-2.5 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"
                 >
                   <option value="">-- Choose Category --</option>
-                  {filteredCategories.map((cat) => (
+                  {Array.isArray(filteredCategories) && filteredCategories.map((cat) => (
                     <option
                       key={cat._id}
                       value={cat._id}
@@ -449,7 +474,7 @@ const Dashboard = () => {
           </h3>
         </div>
         <div className="divide-y divide-border">
-          {transactions.length > 0 ? (
+          {Array.isArray(transactions) && transactions.length > 0 ? (
             transactions.map((tx) => (
               <div
                 key={tx._id}
@@ -460,7 +485,7 @@ const Dashboard = () => {
                     {tx.note || "No details provided"}
                   </p>
                   <p className="text-xs text-muted-foreground font-medium">
-                    {new Date(tx.date).toLocaleDateString()}
+                    {tx.date ? new Date(tx.date).toLocaleDateString() : ""}
                   </p>
                 </div>
 
@@ -469,7 +494,7 @@ const Dashboard = () => {
                     className={`text-base font-bold ${tx.type === "income" ? "text-emerald-500" : "text-rose-500"}`}
                   >
                     {tx.type === "income" ? "+" : "-"} Rs.{" "}
-                    {tx.amount.toLocaleString()}
+                    {(tx.amount || 0).toLocaleString()}
                   </p>
 
                   {/* 🗑️ Virtual Delete Action Trigger */}
