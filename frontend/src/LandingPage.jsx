@@ -212,8 +212,8 @@ const LandingPage = () => {
                 <AnimatedWriter
                   lines={[
                     "Built by Huzaifa — MERN Stack Engineer",
-                    "Production-quality student portfolio",
-                    "BSCS • NED University"
+                    "My Personal Project Portfolio",
+                    "BSCS @ NED University, Karachi"
                   ]}
                   reduceMotion={reduceMotion}
                 />
