@@ -1,9 +1,10 @@
 import axios from 'axios';
 
-// Ek central instance jo aapke port 3000 ke backend se baat karega
-const api = axios.create({
-  baseURL:'http://localhost:3000/api', 
+// Use VITE_API_URL in local development if set, otherwise default to relative /api for deployments
+const baseURL = import.meta.env.VITE_API_URL ?? '/api';
 
+const api = axios.create({
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
